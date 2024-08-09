@@ -1,6 +1,6 @@
 export interface Event {
     id: number
-    caregory: string
+    category: string
     title: string
     description: string
     location: string
@@ -9,14 +9,16 @@ export interface Event {
     petsAllowed: boolean
     organizer: string
 }
-
 export interface Student {
     id: number
     studentId: string
-    namee: string
+    name: string
     surname: string
     gpa: number
     image: string
-    penAmount: number
     description: string
+}
+
+export interface MessageState {
+    message: string
 }
