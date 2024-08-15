@@ -1,45 +1,64 @@
 <script setup lang="ts">
 import EventCard from '@/components/EventCard.vue'
-import { type Event} from '@/types'
-import { ref, onMounted, computed, watchEffect } from 'vue'
+import type { Event } from '@/type'
+import { ref, onMounted, watchEffect, computed } from 'vue'
 import EventService from '@/services/EventService'
+import type { AxiosResponse } from 'axios'
 
-const events = ref<Event[] | null>(null)
-const totalEvents = ref(0)
-const hasNextPage = computed(() => {
-  const totalPages = Math.ceil(totalEvents.value / 2)
-  return page.value < totalPages
-})
+const events = ref<Event[]>([])
+const totalEvent = ref<number>(0)
 const props = defineProps({
   page: {
     type: Number,
-    required: true,
+    required: true
+  },
+  pageLimit: {
+    type: Array<number>,
+    required: true
   }
 })
-const page = computed(() => props.page)
-
 onMounted(() => {
   watchEffect(() => {
-    EventService.getEvents(2, page.value)
-      .then((response) => {
+    EventService.getEvents(3, props.page)
+      .then((response: AxiosResponse<Event[]>) => {
         events.value = response.data
-        totalEvents.value = response.headers['x-total-count']
+        totalEvent.value = response.headers['x-total-count']
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('There was an error!', error)
       })
   })
 })
+const hasNextPage = computed(() => {
+  // calculate total page
+  const totalPages = props.pageLimit.length - 1
+  return props.page.valueOf() < totalPages
+})
 </script>
 
 <template>
-  <h1>Events For Good</h1>
-  <!-- Nnew element -->
+  <h1>Event for good</h1>
+  <!--new element-->
   <div class="events">
-    <EventCard v-for="event in events" :key="event.id" :event="event"/>
+    <EventCard v-for="event in events" :key="event.id" :event="event"></EventCard>
+    <EventInfo v-for="event in events" :key="event.id" :event="event"></EventInfo>
     <div class="pagination">
-      <RouterLink :to="{ name: 'event-list-view', query: { page: page - 1 } }" rel="prev" v-if="page != 1">&#60; Prev Page</RouterLink>
-      <RouterLink :to="{ name: 'event-list-view', query: { page: page + 1 } }" rel="next" v-if="hasNextPage">Next Page &#62;</RouterLink>
+      <RouterLink
+        :to="{ name: 'event-list-view', query: { page: page - 1 } }"
+        rel="prev"
+        v-if="page != 1"
+        id="page-prev"
+      >
+        Prev Page</RouterLink
+      >
+      <RouterLink
+        :to="{ name: 'event-list-view', query: { page: page + 1 } }"
+        rel="next"
+        v-if="hasNextPage"
+        id="page-next"
+      >
+        Next Page</RouterLink
+      >
     </div>
   </div>
 </template>
@@ -50,14 +69,14 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
 }
-.pagination {
+.panigation {
   display: flex;
   width: 290px;
 }
-.pagination a {
+.panigation a {
   flex: 1;
   text-decoration: none;
-  color: #2c3e50;
+  color: #2c3E50;
 }
 #page-prev {
   text-align: left;
